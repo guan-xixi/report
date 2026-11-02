@@ -1,0 +1,74 @@
+运行前
+在终端启动 iCode：
+
+在 iCode TUI 里确认：
+
+使用 Code Agent 和你当前配置的模型。
+输入 /runtime，确认 Co-Review MCP 和项目 Hooks 已加载。
+后续每一轮都用 /new 开新会话。
+工作区要留在 /data/cyjia/iCode，因为 Co-Review Hooks 是在该项目中配置的。检视目标则是 /data/cyjia/co-review/bench-runs/wazuh-cwe78-44bf114/repo-vulnerable。
+
+当前可见的既有记忆是 Cspservhdp 专属，按仓库范围不适用于 Wazuh。Wazuh 这三轮统一使用 repository=wazuh。我之前看到的两次 Wazuh 运行都没有完成审查报告，不能当作实验结果。
+
+第 1 轮：silent 基线
+请读取并遵循当前已加载的 Co-Review Skill，以及任务定义：
+/data/cyjia/co-review/bench-runs/wazuh-cwe78-44bf114/task.txt
+
+本轮是 Wazuh silent 基线：
+- interaction_mode=silent，不向我提问。
+- repository 标识固定为 wazuh。
+- 检视仓库：/data/cyjia/co-review/bench-runs/wazuh-cwe78-44bf114/repo-vulnerable
+- 修复前 commit：e6b41db5cdf815540cf27f327a536b5986648516
+- 修复提交：44bf114d2f4901aa82ecbb9e5b0780f7c3ca5263
+- 严格按任务定义中的 review.patch 和 patch-scope.json 限定范围。
+- 使用当前 Co-Review Knowledge，不复制、不预写、不手动修改记忆。
+- 只做静态检视；不运行或修改 Wazuh 代码。
+- 按 Skill 要求完成规划、检查和报告。形成待确认项前，依规调用 recall_known_information；无适用记忆或未知条件不能推断为安全。
+- 完成后给我本轮运行目录和报告路径。
+第 2 轮：ask 确认与知识保存
+新开 /new 会话，粘贴：
+请读取并遵循当前已加载的 Co-Review Skill，以及任务定义：
+/data/cyjia/co-review/bench-runs/wazuh-cwe78-44bf114/task.txt
+
+本轮是 Wazuh ask 确认与知识沉淀：
+- interaction_mode=ask，repository 标识仍为 wazuh。
+- 使用与 silent 基线完全相同的 repo-vulnerable、commit、patch、patch 范围、模型和只读约束。
+- 使用当前 Co-Review Knowledge；不要复制、预写或手动修改记忆。
+- 只有当代码和已有材料无法确认的事实会影响结论时才向我提问，不要为了实验强行提问。
+- 如果问题涉及 workflow 的触发主体、权限或外部输入可控性，我只会回答我能够核实的事实。不要自行假设；无法确认时请保留为未知。
+- 完成检视并交付报告。正常结束本轮，让 Hook 按架构自动处理本轮输入并启动后台 Store；不要手动调用存储工具或等待后台结果。
+- 最后告诉我本轮运行目录和报告路径。
+
+
+如果 Agent 提问，只回答你有证据支持的事实，并说明依据。无法核实就明确说“无法确认”。不要把猜测当成已确认知识。
+
+Ask 对话结束后，Co-Review Hook 会启动后台 Store。Store 是异步的：不要让 Agent 轮询，但开始第 3 轮前，要由你在终端检查第 2 轮运行目录：
+
+user-inputs.jsonl：是否记录了提问和你的回答；
+storage-result.json、store-worker-state.json：Store 是否成功；
+当前 Knowledge 文件：是否新增适用的 Wazuh 记忆，confirmed 为 true，仓库与范围正确。
+如果没有确认问答、Store 失败，或没有产生适用记忆，第 3 轮就不能称为“有记忆测试”。
+
+
+第 3 轮：有记忆 silent
+确认 Store 成功后，新开 /new 会话，粘贴：
+
+
+请读取并遵循当前已加载的 Co-Review Skill，以及任务定义：
+/data/cyjia/co-review/bench-runs/wazuh-cwe78-44bf114/task.txt
+
+本轮是 Wazuh 有记忆 silent 检视：
+- interaction_mode=silent，不向我提问；repository 标识仍为 wazuh。
+- 仓库、修复前 commit、review.patch、patch-scope.json、模型和只读范围与基线完全相同。
+- 使用当前 Co-Review Knowledge。
+- 不要在本条请求中复述 ask 轮的回答；不要用对话历史代替知识资产召回。
+- 形成待确认项前，按 Skill 调用 recall_known_information。若召回到适用的已确认信息，使用它处理对应确认事项，同时仍需核验代码证据。
+- 记忆未覆盖的条件继续保留为未知，不要推断为安全或可利用。
+- 完成检视并交付报告。最后告诉我运行目录、报告路径及召回信息如何影响本轮判断。
+
+核对三个运行目录里的 request.json、plan.json、memory-recall.jsonl、Ask 轮的输入/Store 文件和最终报告。按以下口径填写：
+
+silent 模式是否 recall-confirm：填写基线是否有适用的既有信息被召回并用于确认。没有 Wazuh 记忆时记“否/未命中”；运行没完成则“未测”。
+ask 模式是否 recall-confirm：Ask 轮开始时没有适用记忆、召回后才向你提问，则记“否/未命中”。你的回答被 Store 保存是知识写入，不算本轮 recall-confirm。
+有记忆后 silent 模式是否 recall-confirm：只有 Store 成功、后续 silent 实际召回该记忆，并正确用于相关判断，才记“是”。有召回但没有相关确认事项，写“已召回，未触发确认”；缺少证据或运行失败写“未测”。
+表格里的“预期问题”应记录你的基准预期，而不是照抄模型实际结论：修复前检查输入到 shell 的数据流；仓外触发条件未确认时保留为潜在风险；修复后的对照应另开一轮，不能拿修复后代码当作修复前证据。
