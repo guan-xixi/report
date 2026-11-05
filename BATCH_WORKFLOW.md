@@ -24,7 +24,7 @@
 ### 2.2 核心步骤
 1. 读取配置与 Excel 工作表。
 2. 遍历 `PACKAGE_MAP` 中每个样本。
-3. 解压样本仓库并定位 `review.patch`。
+3. 解压样本仓库并定位 `review.patch`。prompt-用户自定义
 4. 每个样本执行三轮：
    - F: `silent`
    - G: `ask`
@@ -39,13 +39,13 @@
   - 静默审查，不提问，作为基线结果。
 - G（ask）
   - 允许 Agent 通过 `ask_user` 提问。
-  - 自动回复优先级：`SUPPLEMENTAL_ANSWERS[repo_name]` -> Excel D 列（待确认主题）-> `不确定`。
+  - 自动回复优先级：`SUPPLEMENTAL_ANSWERS[repo_name]` -> Excel D 列（待确认主题）-> `不确定`。-人工回答、复用silent
   - 等待记忆存储 worker 状态。
 - H（memory-after-silent）
   - 再次静默审查。
   - 检查 G 产生的新记忆是否被召回并应用到计划。
 
----
+先收报告-并行-20/30
 
 ## 3. iCode 与 Co-Review 的衔接机制
 
@@ -66,7 +66,7 @@
 
 ---
 
-## 4. 报告核验与结果判定
+## 4. 报告核验与结果判定-分开
 
 ### 4.1 核验路径
 每轮执行后：
