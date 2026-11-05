@@ -1,6 +1,7 @@
+
 param(
-  [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot),
-  [string]$PythonCmd = "py -3"
+    [string]$ProjectRoot = $PSScriptRoot,
+    [string]$PythonCmd = "python"
 )
 
 $ErrorActionPreference = "Stop"
@@ -9,23 +10,52 @@ Write-Host "[1/6] Project root: $ProjectRoot"
 Set-Location $ProjectRoot
 
 Write-Host "[2/6] Create .venv"
-& cmd /c "$PythonCmd -m venv .venv"
 
-Write-Host "[3/6] Upgrade pip"
-& .\.venv\Scripts\python.exe -m pip install --upgrade pip
+$Python = Get-Command $PythonCmd -ErrorAction SilentlyContinue
 
-Write-Host "[4/6] Install base dependencies"
-& .\.venv\Scripts\python.exe -m pip install -r .\co-review_bench\requirements.windows.txt
-
-Write-Host "[5/6] Verify imports"
-& .\.venv\Scripts\python.exe -c "import openpyxl, yaml; print('base deps ok')"
-
-Write-Host "[6/6] Optional ACP check"
-try {
-  & .\.venv\Scripts\python.exe -c "import acp; print('acp ok')"
-} catch {
-  Write-Warning "acp import failed in this venv. If your iCode runtime bundles ACP, you can still run with that Python. Otherwise install ACP package used by your iCode distribution."
+if (-not $Python) {
+    throw "找不到 Python。请先安装 Python，并配置 PATH。"
 }
 
-Write-Host "Done. Activate with: .\.venv\Scripts\Activate.ps1"
-Write-Host "Then run: python .\co-review_bench\bench_fill_full_exe.py"
+& $Python.Source --version
+& $Python.Source -m venv .venv
+
+$VenvPython = Join-Path $ProjectRoot ".venv\Scripts\python.exe"
+
+if (-not (Test-Path $VenvPython)) {
+    throw "虚拟环境创建失败。"
+}
+
+Write-Host "[3/6] Upgrade pip"
+& $VenvPython -m pip install --upgrade pip
+
+Write-Host "[4/6] Install base dependencies"
+
+$Requirements = Join-Path $ProjectRoot "requirements.windows.txt"
+
+if (-not (Test-Path $Requirements)) {
+    throw "找不到 requirements.windows.txt"
+}
+
+& $VenvPython -m pip install -r $Requirements
+
+Write-Host "[5/6] Verify imports"
+& $VenvPython -c "import openpyxl, yaml; print('base deps ok')"
+
+Write-Host "[6/6] Optional ACP check"
+
+try {
+    & $VenvPython -c "import acp; print('acp ok')"
+    if ($LASTEXITCODE -ne 0) {
+        throw "ACP import failed"
+    }
+}
+catch {
+    Write-Warning "ACP 导入失败，需要确认 iCode 使用的 ACP SDK。"
+}
+
+Write-Host ""
+Write-Host "Environment setup completed."
+Write-Host "Activate: .\.venv\Scripts\Activate.ps1"
+Write-Host "Run: .\.venv\Scripts\python.exe .\bench_fill_full_exe.py"
+
