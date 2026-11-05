@@ -1,3 +1,8 @@
+
+powershell -ExecutionPolicy Bypass -File .\co-review_bench\setup_windows_env.ps1
+
+
+
 运行前
 在终端启动 iCode：
 
