@@ -411,7 +411,11 @@ def run_single_mode(repo_path, repo_name, mode, commit, review_patch_path,
     "questions": [],
     "error": None,
   }
-  answer = SUPPLEMENTAL_ANSWERS.get(repo_name, "无法确认该信息；请将该条件保留为未知，不要据此推断。")
+  if mode == "ask":
+    # Ask 模式下优先使用显式配置，其次使用 Excel D 列待确认主题；都没有时回复“不确定”。
+    answer = SUPPLEMENTAL_ANSWERS.get(repo_name) or (missing_info.strip() if missing_info else "") or "不确定"
+  else:
+    answer = SUPPLEMENTAL_ANSWERS.get(repo_name, "无法确认该信息；请将该条件保留为未知，不要据此推断。")
   request_path = WORK_BASE / "requests" / f"{repo_name}-{mode}-{uuid.uuid4().hex}.json"
   save_json(request_path, build_request(repo_path, repo_name, mode, commit, review_patch_path))
 
@@ -580,5 +584,4 @@ def main():
 
 
 if __name__ == "__main__":
-  main()
   main()
