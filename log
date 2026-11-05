@@ -4,8 +4,7 @@ powershell -ExecutionPolicy Bypass -File .\co-review_bench\setup_windows_env.ps1
 powershell -ExecutionPolicy Bypass -File setup_windows_env.ps1
 [1/6] Project root: D:\
 [2/6] Create .venv
-'py' 不是内部或外部命令，也不是可运行的程序
-或批处理文件。
+Python was not found; run without arguments to install from the Microsoft Store, or disable this shortcut from Settings > Apps > Advanced app settings > App execution aliases.
 [3/6] Upgrade pip
 & : 无法将“.\.venv\Scripts\python.exe”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确保路径正确，然后再试一次。
 所在位置 D:\co-review-bench\setup_windows_env.ps1:15 字符: 3
@@ -13,6 +12,24 @@ powershell -ExecutionPolicy Bypass -File setup_windows_env.ps1
 +   ~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : ObjectNotFound: (.\.venv\Scripts\python.exe:String) [], ParentContainsErrorRecordException
     + FullyQualifiedErrorId : CommandNotFoundException
+ 
+PS D:\co-review-bench> powershell -ExecutionPolicy Bypass -File .\setup_windows_env.ps1
+所在位置 D:\co-review-bench\setup_windows_env.ps1:23 字符: 44
++ $VenvPython = Join-Path $ProjectRoot ".venv\Scripts\python.exe"
++                                            ~~~~~~~~~~~~~~~~~~~~
+表达式或语句中包含意外的标记“\Scripts\python.exe"
+if (-not (Test-Path $VenvPython)) {
+    throw "铏氭嫙鐜鍒涘缓澶辫触銆?”。
+所在位置 D:\co-review-bench\setup_windows_env.ps1:60 字符: 69
++ Write-Host "Run: .\.venv\Scripts\python.exe .\bench_fill_full_exe.py"
++                                                                     ~
+字符串缺少终止符: "。
+所在位置 D:\co-review-bench\setup_windows_env.ps1:53 字符: 7
++ catch {
++       ~
+语句块或类型定义中缺少右“}”。
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : UnexpectedToken
  
 
 运行前
