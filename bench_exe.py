@@ -32,12 +32,30 @@ from pathlib import Path
 
 import openpyxl
 
+
+IS_WINDOWS = os.name == "nt"
+HOME = Path.home()
+if IS_WINDOWS:
+  DEFAULT_BENCH_XLSX = HOME / "iCode" / "bench_info.xlsx"
+  DEFAULT_PKG_DIR = HOME / "co-review-pkgs"
+  DEFAULT_WORK_BASE = Path(os.environ.get("TEMP", str(HOME / "AppData" / "Local" / "Temp"))) / "co-review-bench"
+  DEFAULT_ICODE_EXE = HOME / "iCode" / "icode.exe"
+  DEFAULT_ASSET_ROOT = HOME / "co-review" / "co-review"
+  DEFAULT_RUNTIME_SRC = HOME / "co-review" / "runtime-src" / "scripts"
+else:
+  DEFAULT_BENCH_XLSX = Path("/data/cyjia/iCode/bench_info.xlsx")
+  DEFAULT_PKG_DIR = Path("/tmp")
+  DEFAULT_WORK_BASE = Path("/tmp/co-review-bench")
+  DEFAULT_ICODE_EXE = Path("/data/cyjia/iCode/icode.exe")
+  DEFAULT_ASSET_ROOT = Path("/data/cyjia/co-review/co-review")
+  DEFAULT_RUNTIME_SRC = Path("/data/cyjia/co-review/runtime-src/scripts")
+
 # ================= 用户必须修改的配置 =================
-BENCH_XLSX = Path(os.environ.get("CO_REVIEW_BENCH_XLSX", "/data/cyjia/iCode/bench_info.xlsx"))
+BENCH_XLSX = Path(os.environ.get("CO_REVIEW_BENCH_XLSX", str(DEFAULT_BENCH_XLSX)))
 SHEET_NAME = "Sheet1"
-PKG_DIR = Path(os.environ.get("CO_REVIEW_PKG_DIR", "/tmp"))
-WORK_BASE = Path(os.environ.get("CO_REVIEW_WORK_BASE", "/tmp/co-review-bench"))
-ICODE = Path(os.environ.get("CO_REVIEW_ICODE_EXE", "/data/cyjia/iCode/icode.exe"))
+PKG_DIR = Path(os.environ.get("CO_REVIEW_PKG_DIR", str(DEFAULT_PKG_DIR)))
+WORK_BASE = Path(os.environ.get("CO_REVIEW_WORK_BASE", str(DEFAULT_WORK_BASE)))
+ICODE = Path(os.environ.get("CO_REVIEW_ICODE_EXE", str(DEFAULT_ICODE_EXE)))
 RUN_TIMEOUT_SEC = int(os.environ.get("CO_REVIEW_RUN_TIMEOUT_SEC", "600"))
 ASK_TIMEOUT_SEC = 300
 
@@ -60,9 +78,9 @@ COL_H = 8          # 有记忆后的 silent
 SUPPLEMENTAL_ANSWERS = {}
 # =====================================================
 
-os.environ.setdefault("CO_REVIEW_ASSET_ROOT", "/data/cyjia/co-review/co-review")
+os.environ.setdefault("CO_REVIEW_ASSET_ROOT", str(DEFAULT_ASSET_ROOT))
 
-SRC = "/data/cyjia/co-review/runtime-src/scripts"
+SRC = os.environ.get("CO_REVIEW_RUNTIME_SRC", str(DEFAULT_RUNTIME_SRC))
 if SRC not in sys.path:
   sys.path.insert(0, SRC)
 
@@ -562,4 +580,5 @@ def main():
 
 
 if __name__ == "__main__":
+  main()
   main()
